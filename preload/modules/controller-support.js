@@ -6,7 +6,8 @@ module.exports = async () => {
     const gamepadKeyCodeMap = { //aiming to maintain parity with the console versions of leanback
         0:  13,  //a -> enter
         1:  27,  //b -> escape
-        2:  170, //x -> asterisk (search)
+        2:  32,  //x -> space
+        3:  13,  //y -> return (same as enter)
         4:  'shift+tab', //left bumper -> shift+tab
         5:  9, //right bumper -> tab
         6:  113, //left trigger -> f2 (seek backwards)
@@ -19,19 +20,19 @@ module.exports = async () => {
         15: 39   //dpad right -> arrow key right
     }
 
-    // Key mapping for modern KeyboardEvent properties
+    // Key mapping for Electron's sendInputEvent
     const keyCodeToKeyMap = {
-        13: { code: 'Enter', key: 'Enter' },
+        13: { code: 'Return', key: 'Enter' },
         27: { code: 'Escape', key: 'Escape' },
-        170: { code: 'NumpadMultiply', key: '*' },
+        32: { code: 'Space', key: ' ' },
         115: { code: 'F4', key: 'F4' },
         9: { code: 'Tab', key: 'Tab' },
         113: { code: 'F2', key: 'F2' },
         114: { code: 'F3', key: 'F3' },
-        38: { code: 'ArrowUp', key: 'ArrowUp' },
-        40: { code: 'ArrowDown', key: 'ArrowDown' },
-        37: { code: 'ArrowLeft', key: 'ArrowLeft' },
-        39: { code: 'ArrowRight', key: 'ArrowRight' },
+        38: { code: 'Up', key: 'ArrowUp' },
+        40: { code: 'Down', key: 'ArrowDown' },
+        37: { code: 'Left', key: 'ArrowLeft' },
+        39: { code: 'Right', key: 'ArrowRight' },
         135: { code: 'F24', key: 'F24' }
     }
 
@@ -164,8 +165,7 @@ module.exports = async () => {
         const { ipcRenderer } = require('electron')
         ipcRenderer.invoke('send-key-event', 'keyDown', {
             type: 'keyDown',
-            keyCode: keyInfo.code,
-            key: keyInfo.key
+            keyCode: keyInfo.code
         })
     }
 
@@ -189,8 +189,7 @@ module.exports = async () => {
         const { ipcRenderer } = require('electron')
         ipcRenderer.invoke('send-key-event', 'keyUp', {
             type: 'keyUp',
-            keyCode: keyInfo.code,
-            key: keyInfo.key
+            keyCode: keyInfo.code
         })
     }    function startKeyRepeat(keyCode) {
         clearInterval(keyRepeatTimeout)

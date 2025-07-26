@@ -200,7 +200,22 @@ async function main() {
             }
             
             console.log('Main process sending input event:', inputEvent)
-            win.webContents.sendInputEvent(inputEvent)
+            
+            // Try multiple formats for better compatibility
+            try {
+                win.webContents.sendInputEvent(inputEvent)
+            } catch (error) {
+                console.error('sendInputEvent failed:', error)
+                // Try with different format
+                const altEvent = {
+                    type: eventData.type,
+                    keyCode: eventData.keyCode.toLowerCase()
+                }
+                if (eventData.modifiers) altEvent.modifiers = eventData.modifiers
+                console.log('Trying alternative format:', altEvent)
+                win.webContents.sendInputEvent(altEvent)
+            }
+            
             return true
         }
         return false
