@@ -194,6 +194,12 @@ async function main() {
                 keyCode: eventData.keyCode
             }
             
+            // Add modifiers if present
+            if (eventData.modifiers && eventData.modifiers.length > 0) {
+                inputEvent.modifiers = eventData.modifiers
+            }
+            
+            console.log('Main process sending input event:', inputEvent)
             win.webContents.sendInputEvent(inputEvent)
             return true
         }

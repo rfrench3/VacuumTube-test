@@ -7,7 +7,7 @@ module.exports = async () => {
         0:  13,  //a -> enter
         1:  27,  //b -> escape
         2:  170, //x -> asterisk (search)
-        4:  115, //left bumper -> f4 (back)
+        4:  'shift+tab', //left bumper -> shift+tab
         5:  9, //right bumper -> tab
         6:  113, //left trigger -> f2 (seek backwards)
         7:  114, //right trigger -> f3 (seek forwards)
@@ -147,6 +147,17 @@ module.exports = async () => {
     function simulateKeyDown(keyCode) {
         if (!focused) return;
 
+        // Handle special key combinations
+        if (keyCode === 'shift+tab') {
+            const { ipcRenderer } = require('electron')
+            ipcRenderer.invoke('send-key-event', 'keyDown', {
+                type: 'keyDown',
+                keyCode: 'Tab',
+                modifiers: ['shift']
+            })
+            return;
+        }
+
         const keyInfo = keyCodeToKeyMap[keyCode] || { code: 'Unidentified', key: 'Unidentified' }
         
         // Use Electron's native input events for trusted keyboard simulation
@@ -160,6 +171,17 @@ module.exports = async () => {
 
     function simulateKeyUp(keyCode) {
         if (!focused) return;
+
+        // Handle special key combinations
+        if (keyCode === 'shift+tab') {
+            const { ipcRenderer } = require('electron')
+            ipcRenderer.invoke('send-key-event', 'keyUp', {
+                type: 'keyUp',
+                keyCode: 'Tab',
+                modifiers: ['shift']
+            })
+            return;
+        }
 
         const keyInfo = keyCodeToKeyMap[keyCode] || { code: 'Unidentified', key: 'Unidentified' }
         
