@@ -186,6 +186,20 @@ async function main() {
         }
     })
 
+    // Handle native key events from controller support
+    electron.ipcMain.handle('send-key-event', (e, eventType, eventData) => {
+        if (win && win.webContents) {
+            const inputEvent = {
+                type: eventData.type,
+                keyCode: eventData.keyCode
+            }
+            
+            win.webContents.sendInputEvent(inputEvent)
+            return true
+        }
+        return false
+    })
+
     // Userstyles
     const userstylesDir = path.join(userData, 'userstyles')
     let userstylesWatcher = null;
@@ -371,6 +385,7 @@ async function createWindow() {
         win.setFullScreen(fullscreen)
         win.setAlwaysOnTop(config.keep_on_top)
         win.show()
+        win.webContents.openDevTools()
     })
 
     if (process.argv.includes('--debug-gpu')) {
@@ -380,7 +395,7 @@ async function createWindow() {
     }
 
     console.log('loading youtube')
-    win.loadURL('https://www.youtube.com/tv', { userAgent: youtubeUserAgent })
+    win.loadURL('https://www.netflix.com/', { userAgent: userAgent })
 
     //remember fullscreen preference
     win.on('enter-full-screen', () => {

@@ -8,7 +8,7 @@ module.exports = async () => {
         1:  27,  //b -> escape
         2:  170, //x -> asterisk (search)
         4:  115, //left bumper -> f4 (back)
-        5:  116, //right bumper -> f5 (forward)
+        5:  9, //right bumper -> tab
         6:  113, //left trigger -> f2 (seek backwards)
         7:  114, //right trigger -> f3 (seek forwards)
         8:  13,  //select -> enter
@@ -17,6 +17,22 @@ module.exports = async () => {
         13: 40,  //dpad down -> arrow key down
         14: 37,  //dpad left -> arrow key left
         15: 39   //dpad right -> arrow key right
+    }
+
+    // Key mapping for modern KeyboardEvent properties
+    const keyCodeToKeyMap = {
+        13: { code: 'Enter', key: 'Enter' },
+        27: { code: 'Escape', key: 'Escape' },
+        170: { code: 'NumpadMultiply', key: '*' },
+        115: { code: 'F4', key: 'F4' },
+        9: { code: 'Tab', key: 'Tab' },
+        113: { code: 'F2', key: 'F2' },
+        114: { code: 'F3', key: 'F3' },
+        38: { code: 'ArrowUp', key: 'ArrowUp' },
+        40: { code: 'ArrowDown', key: 'ArrowDown' },
+        37: { code: 'ArrowLeft', key: 'ArrowLeft' },
+        39: { code: 'ArrowRight', key: 'ArrowRight' },
+        135: { code: 'F24', key: 'F24' }
     }
 
     const fallbackKeyCode = 135; //f24, key isn't used by youtube but is picked up and brings up the menu thing (which all buttons do if they dont do anything else)
@@ -87,6 +103,7 @@ module.exports = async () => {
             let axisIndex = i + gamepad.buttons.length; //this is kind of hacky but its fine
 
             let axisWasPressed = pressedButtons[index][axisIndex]
+            let lastKeyCode = pressedButtons[index][axisIndex + '_keyCode']
 
             if (i === 0) {
                 if (axisValue > 0.5) {
@@ -109,6 +126,7 @@ module.exports = async () => {
             if (keyCode) {
                 if (!axisWasPressed) {
                     pressedButtons[index][axisIndex] = true;
+                    pressedButtons[index][axisIndex + '_keyCode'] = keyCode;
                     simulateKeyDown(keyCode)
                     stopKeyRepeat()
                     keyRepeatTimeout = setTimeout(() => startKeyRepeat(keyCode), keyRepeatDelay)
@@ -116,7 +134,10 @@ module.exports = async () => {
             } else {
                 if (axisWasPressed) {
                     pressedButtons[index][axisIndex] = false;
-                    simulateKeyUp(keyCode)
+                    if (lastKeyCode) {
+                        simulateKeyUp(lastKeyCode)
+                    }
+                    pressedButtons[index][axisIndex + '_keyCode'] = null;
                     stopKeyRepeat()
                 }
             }
@@ -126,20 +147,30 @@ module.exports = async () => {
     function simulateKeyDown(keyCode) {
         if (!focused) return;
 
-        let event = new Event('keydown')
-        event.keyCode = keyCode;
-        document.dispatchEvent(event)
+        const keyInfo = keyCodeToKeyMap[keyCode] || { code: 'Unidentified', key: 'Unidentified' }
+        
+        // Use Electron's native input events for trusted keyboard simulation
+        const { ipcRenderer } = require('electron')
+        ipcRenderer.invoke('send-key-event', 'keyDown', {
+            type: 'keyDown',
+            keyCode: keyInfo.code,
+            key: keyInfo.key
+        })
     }
 
     function simulateKeyUp(keyCode) {
         if (!focused) return;
 
-        let event = new Event('keyup')
-        event.keyCode = keyCode;
-        document.dispatchEvent(event)
-    }
-
-    function startKeyRepeat(keyCode) {
+        const keyInfo = keyCodeToKeyMap[keyCode] || { code: 'Unidentified', key: 'Unidentified' }
+        
+        // Use Electron's native input events for trusted keyboard simulation
+        const { ipcRenderer } = require('electron')
+        ipcRenderer.invoke('send-key-event', 'keyUp', {
+            type: 'keyUp',
+            keyCode: keyInfo.code,
+            key: keyInfo.key
+        })
+    }    function startKeyRepeat(keyCode) {
         clearInterval(keyRepeatTimeout)
         clearTimeout(keyRepeatTimeout)
         keyRepeatTimeout = setInterval(() => simulateKeyDown(keyCode), keyRepeatInterval)
