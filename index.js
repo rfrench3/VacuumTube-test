@@ -1,11 +1,19 @@
-//initialization
+/*
+For the most part, this app is VacuumTube adapted for websites that do not have a dedicated controller layout.
+It is a proof-of-concept, and should be used as such.
+
+The VacuumTube source code: https://github.com/shy1132/VacuumTube
+This source code: https://github.com/rfrench3/VacuumTube-test
+*/
+
+
 const electron = require('electron')
 const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const fs = require('fs')
 const chokidar = require('chokidar')
 
-electron.app.setName('VacuumTube')
+electron.app.setName('Netflix Bigscreen')
 
 const userData = electron.app.getPath('userData')
 const sessionData = path.join(userData, 'sessionData')
@@ -29,7 +37,6 @@ the "compatible" and "VacuumTube" part are just for transparency's sake, and to 
 this is only used because you have to have a good user agent to be "allowed" onto leanback, and many innertube endpoints check the user agent specifically to know what to send (e.g. high quality thumbnails)
 VacuumTube overrides some things to identify properly, but this user agent has to be sent with every request to youtube sadly
 */
-const youtubeUserAgent = `Mozilla/5.0 (PS4; Leanback Shell) Cobalt/26.lts.0-qa; compatible; VacuumTube/${package.version}` //for youtube
 const userAgent = `VacuumTube/${package.version}` //for anything else
 const runningOnSteam = process.env.SteamOS == '1' && process.env.SteamGamepadUI == '1'
 
