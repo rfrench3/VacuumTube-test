@@ -94,6 +94,16 @@ module.exports = function showOnScreenKeyboard() {
         } else if (key === 'Enter') {
             // Send the input to the last focused element and close keyboard
             commitInputToTarget();
+        } else if (key === 'Exit') {
+            // Exit the application
+            try {
+                const { ipcRenderer } = require('electron')
+                ipcRenderer.invoke('exit-app')
+            } catch (error) {
+                console.error('Failed to exit app:', error)
+                // Fallback for when electron is not available
+                window.close()
+            }
         } else if (key === 'Shift') {
             isShiftPressed = !isShiftPressed;
             updateModifierKeyAppearance();
@@ -281,7 +291,7 @@ module.exports = function showOnScreenKeyboard() {
             const key = button.dataset.key;
             
             // Don't change display for special keys
-            if (['Shift', 'Caps', 'Enter', 'Backspace', 'Space'].includes(key)) {
+            if (['Shift', 'Caps', 'Enter', 'Backspace', 'Space', 'Exit'].includes(key)) {
                 return;
             }
             
@@ -332,7 +342,7 @@ module.exports = function showOnScreenKeyboard() {
         ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'],
         ['Caps', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'", 'Enter'],
         ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 'Shift'],
-        ['Space']
+        ['Space', 'Exit']
     ];
 
     // Create keyboard rows container
@@ -378,13 +388,21 @@ module.exports = function showOnScreenKeyboard() {
             // Set key widths
             if (key === 'Space') {
                 keyButton.style.flex = '6';
-            } else if (['Backspace', 'Enter', 'Shift', 'Caps'].includes(key)) {
+            } else if (['Backspace', 'Enter', 'Shift', 'Caps', 'Exit'].includes(key)) {
                 keyButton.style.flex = '2';
             } else {
                 keyButton.style.flex = '1';
             }
 
             keyButton.textContent = key === 'Space' ? '' : key;
+            
+            // Special styling for Exit button
+            if (key === 'Exit') {
+                keyButton.style.background = '#d32f2f';
+                keyButton.style.border = '1px solid #b71c1c';
+                keyButton.style.color = '#fff';
+                keyButton.style.fontWeight = 'bold';
+            }
             
             // Add click handler to insert text
             keyButton.addEventListener('click', () => {
@@ -398,12 +416,20 @@ module.exports = function showOnScreenKeyboard() {
             // Add hover effect
             keyButton.addEventListener('mouseenter', () => {
                 if (!keyButton.classList.contains('selected')) {
-                    keyButton.style.background = '#777';
+                    if (key === 'Exit') {
+                        keyButton.style.background = '#f44336';
+                    } else {
+                        keyButton.style.background = '#777';
+                    }
                 }
             });
             keyButton.addEventListener('mouseleave', () => {
                 if (!keyButton.classList.contains('selected') && !keyButton.classList.contains('modifier-active')) {
-                    keyButton.style.background = '#666';
+                    if (key === 'Exit') {
+                        keyButton.style.background = '#d32f2f';
+                    } else {
+                        keyButton.style.background = '#666';
+                    }
                 }
             });
 

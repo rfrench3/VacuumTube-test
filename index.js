@@ -280,6 +280,10 @@ async function main() {
         electron.shell.openPath(userstylesDir)
     })
 
+    electron.ipcMain.handle('exit-app', () => {
+        electron.app.quit()
+    })
+
     await createWindow()
     
     setupUserstylesWatcher()
