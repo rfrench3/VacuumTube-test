@@ -2,6 +2,10 @@
 
 const { ipcRenderer } = require('electron')
 
+const onScreenKeyboard = require('./on-screen-keyboard')
+
+
+
 module.exports = async () => {
     const gamepadKeyCodeMap = { //aiming to maintain parity with the console versions of leanback
         0:  13,  //a -> enter
@@ -12,7 +16,7 @@ module.exports = async () => {
         5:  9, //right bumper -> tab
         6:  113, //left trigger -> f2 (seek backwards)
         7:  114, //right trigger -> f3 (seek forwards)
-        8:  13,  //select -> enter
+        8:  'osk', //select -> open on-screen keyboard
         9:  13,  //start -> enter
         12: 38,  //dpad up -> arrow key up
         13: 40,  //dpad down -> arrow key down
@@ -148,6 +152,12 @@ module.exports = async () => {
     function simulateKeyDown(keyCode) {
         if (!focused) return;
 
+        // Handle special actions
+        if (keyCode === 'osk') {
+            onScreenKeyboard();
+            return;
+        }
+
         // Handle special key combinations
         if (keyCode === 'shift+tab') {
             const { ipcRenderer } = require('electron')
@@ -171,6 +181,11 @@ module.exports = async () => {
 
     function simulateKeyUp(keyCode) {
         if (!focused) return;
+
+        // Handle special actions (no keyup needed for OSK)
+        if (keyCode === 'osk') {
+            return;
+        }
 
         // Handle special key combinations
         if (keyCode === 'shift+tab') {

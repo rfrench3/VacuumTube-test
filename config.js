@@ -10,7 +10,7 @@ let changed = false;
 let config = {}
 
 const defaults = {
-    fullscreen: false, //changes automatically depending on user's last preference
+    fullscreen: true, //changes automatically depending on user's last preference
     adblock: false, //block ads
     dearrow: false, //replaces titles and thumbnails with more accurate and less sensationalized versions from a crowdsourced database (https://dearrow.ajay.app/)
     dislikes: false, //readds youtube dislikes via https://www.returnyoutubedislike.com/
